@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
-import 'package:green_aplication/widgets/navbar.dart';
 import 'package:provider/provider.dart';
 
 class Welcome extends StatelessWidget {
@@ -34,7 +33,7 @@ class Welcome extends StatelessWidget {
               const Text(
                 "Bienvenido al gestor de máquinas de distribución de Punto Green",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, color: Colors.white, ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
               ),
               const SizedBox(height: 40),
               Padding(
@@ -52,40 +51,68 @@ class Welcome extends StatelessWidget {
               Container(
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 70),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.group,
-                      color: Color.fromRGBO(8, 85, 8, 1),
-                      size: 80,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context, '/createdUsers'
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.all(10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    Text("Usuarios", style: const TextStyle(fontSize: 22)),
-                  ],
+                    elevation: 4,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.group,
+                        color: Color.fromRGBO(8, 85, 8, 1),
+                        size: 80,
+                      ),
+                      Text(
+                        "Usuarios",
+                        style: TextStyle(fontSize: 22, color: Colors.black),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
               const SizedBox(height: 30),
               Container(
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 70),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.memory,
-                      color: Color.fromRGBO(8, 85, 8, 1),
-                      size: 80,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.all(10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    Text("Maquinas", style: const TextStyle(fontSize: 22)),
-                  ],
+                    elevation: 4,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.memory,
+                        color: Color.fromRGBO(8, 85, 8, 1),
+                        size: 80,
+                      ),
+                      Text(
+                        "Máquinas",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

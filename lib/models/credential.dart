@@ -1,8 +1,8 @@
-class Credentials {
+class Credential {
   final String email;
   final String password;
 
-  Credentials({required this.email, required this.password});
+  Credential({required this.email, required this.password});
 
   Map<String, dynamic> toJson() => {
         'email': email,

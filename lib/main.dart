@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:green_aplication/guards/auth_guard.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/screens/login.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
+import 'package:green_aplication/screens/usuarios/natural-person.dart';
+import 'package:green_aplication/screens/usuarios/select-user-type.dart';
+import 'package:green_aplication/screens/usuarios/usuariosCreados.dart';
 import 'package:green_aplication/screens/welcome.dart';
+import 'package:green_aplication/services/auth_service.dart';
 import 'package:green_aplication/widgets/navbar.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AuthService().init(); // inicializa cookie desde storage
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => NavBarState(),
@@ -26,7 +34,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/recoverPassword': (context) => const RecoverPassword(),
-        '/welcome': (context) => NavBar(child: const Welcome()),
+ 
+ 
+        // ✅ RUTAS PROTEGIDAS
+        '/welcome': (context) => AuthGuard(child: NavBar(child: const Welcome())),
+        '/createdUsers': (context) => AuthGuard(child: NavBar(child: const UsuariosCreados())),
+        '/naturalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaNatural())),
+        '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
       },
     );
   }
