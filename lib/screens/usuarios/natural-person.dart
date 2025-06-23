@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
+import 'package:green_aplication/services/user_service.dart';
 import 'package:provider/provider.dart';
 
 class PersonaNatural extends StatefulWidget {
@@ -10,6 +12,40 @@ class PersonaNatural extends StatefulWidget {
 }
 
 class _PersonaNaturalState extends State<PersonaNatural> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _identificationController;
+  late TextEditingController _emailController;
+  late TextEditingController _addressController;
+  late TextEditingController _phoneController;
+  late TextEditingController _passwordController;
+  String? _selectedRole;
+  String? _selectedGender;
+  final UserService _userService = UserService();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _identificationController = TextEditingController();
+    _emailController = TextEditingController();
+    _addressController = TextEditingController();
+    _phoneController = TextEditingController();
+    _passwordController = TextEditingController(text: ''); // Valor temporal
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _identificationController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   InputDecoration _inputDecoration(String label, String hint) {
     return InputDecoration(
       labelText: label,
@@ -38,17 +74,92 @@ class _PersonaNaturalState extends State<PersonaNatural> {
     );
   }
 
+  Future<void> _registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final newUser = UserRequest(
+          id: 0,
+          email: _emailController.text,
+          name: _nameController.text,
+          password: _passwordController.text,
+          identification: _identificationController.text,
+          phone: _phoneController.text,
+          gender: _selectedGender ?? 'Otro',
+          address: _addressController.text,
+          isNaturalPerson: true,
+          role: _selectedRole ?? 'USER',
+          isActive: true,
+        );
+
+        await _userService.register(newUser.toJson()); // ✅ Sin response
+
+        final response = await _userService.register(newUser.toJson());
+
+        if (response['id'] != null) {
+          _showSuccessDialog(response['name']); // Pasamos el nombre al dialog
+        } else {
+          _showErrorDialog('Error desconocido al registrar el usuario.');
+        }
+        // ✅ Diálogo con redirección
+      } catch (e) {
+        if (mounted) {
+          _showErrorDialog('Error al registrar: $e');
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  void _showSuccessDialog(String name) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Registro exitoso'),
+        content: Text('El usuario "$name" ha sido registrado correctamente.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Cierra el diálogo
+              Navigator.pushReplacementNamed(
+                context,
+                '/createdUsers',
+              ); // Redirige
+            },
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error en el registro'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final navBarState = Provider.of<NavBarState>(context);
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final TextEditingController _roleController = TextEditingController();
-    final TextEditingController _nameController = TextEditingController();
-    final TextEditingController _identificationController = TextEditingController();
-    final TextEditingController _emailController = TextEditingController();
-    final TextEditingController _addressController = TextEditingController();
-    final TextEditingController _phoneController = TextEditingController();
-    final TextEditingController _genderController = TextEditingController();
 
     return Center(
       child: Container(
@@ -81,20 +192,25 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                     child: navBarState.isExpanded
                         ? IconButton(
                             onPressed: () {
-                              
                               Navigator.pushNamed(context, "/selectUserType");
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(14,145,14,1,),
+                              backgroundColor: const Color.fromRGBO(
+                                14,
+                                145,
+                                14,
+                                1,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               padding: const EdgeInsets.all(6),
-                            ),icon: const Icon(
-                                Icons.arrow_back,
-                                color: Color.fromRGBO(255, 255, 255, 1),
-                                size: 30,
-                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Color.fromRGBO(255, 255, 255, 1),
+                              size: 30,
+                            ),
                           )
                         : ElevatedButton.icon(
                             onPressed: () {
@@ -141,7 +257,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Form(
-                  key: formKey,
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -152,14 +268,13 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                           "Tipo Cliente",
                           "Ingrese su tipo de cliente",
                         ),
-                        enabled:
-                            false, // ← Lo hace no editable, pero conserva el estilo de input
+                        enabled: false,
                       ),
                       const SizedBox(height: 12),
 
                       // Rol
                       DropdownButtonFormField<String>(
-                        
+                        value: _selectedRole,
                         decoration: _inputDecoration("Rol", ""),
                         items: const [
                           DropdownMenuItem(
@@ -175,12 +290,18 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                           }
                           return null;
                         },
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRole = value;
+                          });
+                        },
+                        //hint: Text('Seleccione un rol'),
                       ),
                       const SizedBox(height: 12),
 
                       // Nombre Cliente
                       TextFormField(
+                        controller: _nameController,
                         decoration: _inputDecoration(
                           "Nombre Cliente",
                           "Ingrese su nombre de cliente",
@@ -197,6 +318,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
                       // Cédula / Pasaporte
                       TextFormField(
+                        controller: _identificationController,
                         decoration: _inputDecoration(
                           "Cédula / Pasaporte",
                           "Ingrese su cédula ó pasaporte",
@@ -213,6 +335,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
                       // Correo Electrónico
                       TextFormField(
+                        controller: _emailController,
                         decoration: _inputDecoration(
                           "Correo Electrónico",
                           "Ingrese su correo electrónico",
@@ -222,6 +345,11 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Correo electrónico requerido';
                           }
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
+                            return 'Ingrese un correo válido';
+                          }
                           return null;
                         },
                         keyboardType: TextInputType.emailAddress,
@@ -230,6 +358,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
                       // Teléfono
                       TextFormField(
+                        controller: _phoneController,
                         decoration: _inputDecoration(
                           "Teléfono",
                           "Ingrese su teléfono",
@@ -247,6 +376,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
                       // Dirección
                       TextFormField(
+                        controller: _addressController,
                         decoration: _inputDecoration(
                           "Dirección",
                           "Ingrese su dirección",
@@ -263,6 +393,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
                       // Género
                       DropdownButtonFormField<String>(
+                        value: _selectedGender,
                         decoration: _inputDecoration(
                           "Género",
                           "Seleccione su género",
@@ -285,7 +416,12 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                           ),
                           DropdownMenuItem(value: 'Otro', child: Text('Otro')),
                         ],
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedGender = value;
+                          });
+                        },
+                        //hint: Text('Seleccione un género'),
                       ),
                       const SizedBox(height: 20),
 
@@ -293,28 +429,34 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              // Todos los campos fueron completados correctamente
-                              // Ejecuta la acción de registro aquí
-                            }
-                          },
+                          onPressed: _isLoading ? null : _registerUser,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(
-                              14,
-                              145,
-                              14,
-                              1,
-                            ),
+                            backgroundColor: _isLoading
+                                ? Colors.grey
+                                : const Color.fromRGBO(14, 145, 14, 1),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            "Registrar Usuario",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text(
+                                  "Registrar Usuario",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ],

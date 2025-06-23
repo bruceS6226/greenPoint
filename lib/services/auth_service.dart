@@ -82,6 +82,58 @@ Future<http.Response> get(String endpoint, {BuildContext? context}) async {
   return response;
 }
 
+// auth_service.dart
+Future<http.Response> post(
+  String endpoint, {
+  Map<String, dynamic>? body,
+  BuildContext? context,
+}) async {
+  if (_sessionCookie == null) throw Exception('Sesión no iniciada');
+
+  final url = apiBase.replace(path: '${apiBase.path}$endpoint');
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': _sessionCookie!,
+    },
+    body: jsonEncode(body ?? {}),
+  );
+
+  if (response.statusCode == 401 || response.statusCode == 403) {
+    await logout(context);
+    throw Exception('Sesión expirada');
+  }
+
+  return response;
+}
+
+Future<http.Response> put(
+  String endpoint, {
+  Map<String, dynamic>? body,
+  BuildContext? context,
+}) async {
+  if (_sessionCookie == null) throw Exception('Sesión no iniciada');
+
+  final url = apiBase.replace(path: '${apiBase.path}$endpoint');
+  final response = await http.put(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': _sessionCookie!,
+    },
+    body: jsonEncode(body ?? {}),
+  );
+
+  if (response.statusCode == 401 || response.statusCode == 403) {
+    await logout(context);
+    throw Exception('Sesión expirada');
+  }
+
+  return response;
+}
+
+
   Future<void> logout([BuildContext? context]) async {
   _sessionCookie = null;
   final prefs = await SharedPreferences.getInstance();
