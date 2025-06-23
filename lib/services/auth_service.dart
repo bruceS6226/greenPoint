@@ -90,8 +90,6 @@ class AuthService {
     return response;
   }
 
-
-
   // auth_service.dart
   Future<http.Response> post(
     String endpoint, {
@@ -115,30 +113,31 @@ class AuthService {
     return response;
   }
 
-Future<http.Response> put(
-  String endpoint, {
-  Map<String, dynamic>? body,
-  Map<String, String>? queryParams,
-  BuildContext? context,
-}) async {
-  if (_sessionCookie == null) throw Exception('Sesión no iniciada');
+  Future<http.Response> put(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    Map<String, String>? queryParams,
+    BuildContext? context,
+  }) async {
+    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
 
-  final url = Uri.parse('$apiUrl$endpoint').replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      '$apiUrl$endpoint',
+    ).replace(queryParameters: queryParams);
 
-  final response = await http.put(
-    url,
-    headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
-    body: jsonEncode(body ?? {}),
-  );
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
+      body: jsonEncode(body ?? {}),
+    );
 
-  if (response.statusCode == 401 || response.statusCode == 403) {
-    await logout();
-    throw Exception('Sesión expirada');
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      await logout();
+      throw Exception('Sesión expirada');
+    }
+
+    return response;
   }
-
-  return response;
-}
-
 
   Future<void> logout([BuildContext? context]) async {
     _sessionCookie = null;

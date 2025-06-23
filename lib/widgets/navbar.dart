@@ -230,12 +230,12 @@ class _NavBarState extends State<NavBar> {
                                     buildMenuOption(
                                       icon: Icons.group,
                                       label: 'Ver Máquinas',
-                                      ruta: '',
+                                      ruta: '/createdMachines',
                                     ),
                                     buildMenuOption(
                                       icon: Icons.person_add,
                                       label: 'Gestionar Máquinas',
-                                      ruta: '',
+                                      ruta: '/userSelection',
                                     ),
                                   ],
                                 ),

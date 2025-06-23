@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:green_aplication/models/machine.dart';
 import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
+import 'package:green_aplication/services/machine_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,11 +16,27 @@ class UserInformacion extends StatefulWidget {
 
 class _UserInformacionState extends State<UserInformacion> {
   User? _user;
+  List<Machine> _machines = [];
 
   @override
   void initState() {
     super.initState();
     _loadSpecificUser();
+  }
+
+  Future<void> _loadMachines(int userId) async {
+    try {
+      print(userId);
+      final machineService = MachineService();
+      final data = await machineService.getByUserId(userId);
+      setState(() {
+        _machines = data
+            .map<Machine>((json) => Machine.fromJson(json))
+            .toList();
+      });
+    } catch (e) {
+      print("Error cargando máquinas: $e");
+    }
   }
 
   Future<void> _loadSpecificUser() async {
@@ -27,9 +45,11 @@ class _UserInformacionState extends State<UserInformacion> {
 
     if (jsonString != null) {
       final jsonData = jsonDecode(jsonString);
+      final user = User.fromJson(jsonData);
       setState(() {
-        _user = User.fromJson(jsonData);
+        _user = user;
       });
+      await _loadMachines(user.id);
     }
   }
 
@@ -160,6 +180,7 @@ class _UserInformacionState extends State<UserInformacion> {
                           infoRow("Email:", _user!.email),
                           infoRow("Teléfono:", _user!.phone),
                           infoRow("Dirección:", _user!.address),
+                          infoRow("Género:", _user!.gender),
                         ],
                       ),
                     ),
@@ -172,6 +193,60 @@ class _UserInformacionState extends State<UserInformacion> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    _machines.isEmpty
+                        ? const Text(
+                            "Este usuario no tiene máquinas registradas.",
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              columnSpacing: 16,
+                              headingRowColor: WidgetStateProperty.all<Color>(
+                                const Color.fromRGBO(234, 234, 234, 1),
+                              ),
+                              columns: const [
+                                DataColumn(label: Text('#')),
+                                DataColumn(label: Text('Nombre Máquina')),
+                                DataColumn(label: Text('Cantón')),
+                                DataColumn(label: Text('Sector')),
+                                DataColumn(label: Text('Dirección')),
+                                DataColumn(label: Text('Estado')),
+                                DataColumn(label: Text('Acciones')),
+                              ],
+                              rows: _machines.map((machine) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Text(machine.id?.toString() ?? '-'),
+                                    ),
+                                    DataCell(Text(machine.name)),
+                                    DataCell(Text(machine.canton)),
+                                    DataCell(Text(machine.sector)),
+                                    DataCell(Text(machine.address)),
+                                    DataCell(
+                                      Text(
+                                        machine.active ? 'Activo' : 'Inactivo',
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.visibility,
+                                              color: Colors.blue,
+                                            ),
+                                            tooltip: 'Ver',
+                                            onPressed: () {},
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
                   ],
                 ),
               ),

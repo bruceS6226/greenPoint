@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:green_aplication/guards/auth_guard.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/screens/login.dart';
+import 'package:green_aplication/screens/maquinas/add_machine.dart';
+import 'package:green_aplication/screens/maquinas/created_machines.dart';
+import 'package:green_aplication/screens/maquinas/user_selection.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
-import 'package:green_aplication/screens/usuarios/legal-person.dart';
-import 'package:green_aplication/screens/usuarios/natural-person.dart';
+import 'package:green_aplication/screens/usuarios/add_legal_person.dart';
+import 'package:green_aplication/screens/usuarios/add_natural_person.dart';
 import 'package:green_aplication/screens/usuarios/select-user-type.dart';
 import 'package:green_aplication/screens/usuarios/user_info.dart';
 import 'package:green_aplication/screens/usuarios/usuariosCreados.dart';
@@ -44,6 +47,9 @@ class MyApp extends StatelessWidget {
         '/legalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaLegal())),
         '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
         '/userInfo': (context) => NavBar(child: const UserInformacion()),
+        '/userSelection': (context) => NavBar(child: const SeleccionarUsuario()),
+        '/createdMachines': (context) => NavBar(child: const MaquinasCreadas()),
+        '/addMachine': (context) => NavBar(child: const RegistrarMaquina()),
       },
     );
   }

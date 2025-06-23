@@ -298,7 +298,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
                             _selectedRole = value;
                           });
                         },
-                        //hint: Text('Seleccione un rol'),
+                        hint: Text('Seleccione un rol'),
                       ),
                       const SizedBox(height: 12),
 
