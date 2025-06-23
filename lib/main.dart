@@ -3,8 +3,10 @@ import 'package:green_aplication/guards/auth_guard.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/screens/login.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
+import 'package:green_aplication/screens/usuarios/legal-person.dart';
 import 'package:green_aplication/screens/usuarios/natural-person.dart';
 import 'package:green_aplication/screens/usuarios/select-user-type.dart';
+import 'package:green_aplication/screens/usuarios/user_info.dart';
 import 'package:green_aplication/screens/usuarios/usuariosCreados.dart';
 import 'package:green_aplication/screens/welcome.dart';
 import 'package:green_aplication/services/auth_service.dart';
@@ -34,13 +36,14 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/recoverPassword': (context) => const RecoverPassword(),
- 
- 
+        
         // ✅ RUTAS PROTEGIDAS
         '/welcome': (context) => AuthGuard(child: NavBar(child: const Welcome())),
         '/createdUsers': (context) => AuthGuard(child: NavBar(child: const UsuariosCreados())),
         '/naturalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaNatural())),
+        '/legalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaLegal())),
         '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
+        '/userInfo': (context) => NavBar(child: const UserInformacion()),
       },
     );
   }

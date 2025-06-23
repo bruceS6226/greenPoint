@@ -34,11 +34,10 @@ class SeleccionarTipoUsuario extends StatelessWidget {
                   ),
                   const Spacer(),
                   SizedBox(
-                    width: navBarState.isExpanded ? 43 : 200,
+                    width: navBarState.isExpanded ? 43 : 180,
                     child: navBarState.isExpanded
                         ? IconButton(
                             onPressed: () {
-                              
                               Navigator.pushNamed(context, "/createdUsers");
                             },
                             style: ElevatedButton.styleFrom(
@@ -148,7 +147,11 @@ class SeleccionarTipoUsuario extends StatelessWidget {
                 ? EdgeInsets.symmetric(horizontal: 40)
                 :EdgeInsets.symmetric(horizontal: 60),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context, '/legalPerson'
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     padding: EdgeInsets.all(10),

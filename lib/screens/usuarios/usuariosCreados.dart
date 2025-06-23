@@ -55,7 +55,7 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
                   ),
                   const Spacer(),
                   SizedBox(
-                    width: navBarState.isExpanded ? 43 : 200,
+                    width: navBarState.isExpanded ? 43 : 180,
                     child: navBarState.isExpanded
                         ? IconButton(
                             onPressed: () {
@@ -138,6 +138,14 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
                       columnSpacing: 16,
+                      headingRowColor: WidgetStateProperty.all<Color>(
+                        Color.fromRGBO(
+                          234,
+                          234,
+                          234,
+                          1,
+                        ), // o cualquier otro color
+                      ),
                       columns: const [
                         DataColumn(label: Text('#')),
                         DataColumn(label: Text('Tipo')),
@@ -162,7 +170,148 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
                             DataCell(Text(user.name)),
                             DataCell(Text(user.identification)),
                             DataCell(Text(user.phone)),
-                            DataCell(Text(user.phone)),
+                            DataCell(
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      user.active
+                                          ? Icons.check_circle
+                                          : Icons.cancel,
+                                      color: user.active
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                    tooltip: user.active
+                                        ? 'Activo'
+                                        : 'Inactivo',
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Column(
+                                            children: [
+                                              const Icon(
+                                                Icons.warning_amber_rounded,
+                                                color: Colors.orange,
+                                                size: 48,
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Text(
+                                                '¿Estás seguro que deseas ${user.active ? 'desactivar' : 'activar'} al usuario "${user.name}"?',
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(true),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.blueAccent,
+                                              ),
+                                              child: const Text(
+                                                'Aceptar',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirm != true) return;
+
+                                      try {
+                                        final userService = UserService();
+                                        await userService.changeState(user.id);
+
+                                        if (context.mounted) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            "/createdUsers",
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Error'),
+                                              content: Text(e.toString()),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('Cerrar'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.visibility,
+                                      color: Colors.blue,
+                                    ),
+                                    tooltip: 'Ver',
+                                    onPressed: () async {
+                                      try {
+                                        final userService = UserService();
+                                        await userService.getById(user.id);
+
+                                        if (context.mounted) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            "/userInfo",
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Error'),
+                                              content: Text(e.toString()),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('Cerrar'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.orange,
+                                    ),
+                                    tooltip: 'Editar',
+                                    onPressed: () async {},
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         );
                       }).toList(),

@@ -4,14 +4,14 @@ import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/user_service.dart';
 import 'package:provider/provider.dart';
 
-class PersonaNatural extends StatefulWidget {
-  const PersonaNatural({super.key});
+class PersonaLegal extends StatefulWidget {
+  const PersonaLegal({super.key});
 
   @override
-  State<PersonaNatural> createState() => _PersonaNaturalState();
+  State<PersonaLegal> createState() => _PersonaLegalState();
 }
 
-class _PersonaNaturalState extends State<PersonaNatural> {
+class _PersonaLegalState extends State<PersonaLegal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _identificationController;
@@ -19,7 +19,6 @@ class _PersonaNaturalState extends State<PersonaNatural> {
   late TextEditingController _addressController;
   late TextEditingController _phoneController;
   String? _selectedRole;
-  String? _selectedGender;
   final UserService _userService = UserService();
   bool _isLoading = false;
 
@@ -85,9 +84,9 @@ class _PersonaNaturalState extends State<PersonaNatural> {
           password: '',
           identification: _identificationController.text,
           phone: _phoneController.text,
-          gender: _selectedGender ?? '',
+          gender: '',
           address: _addressController.text,
-          isNaturalPerson: true,
+          isNaturalPerson: false,
           role: _selectedRole ?? 'USER',
           isActive: true,
         );
@@ -129,7 +128,16 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                 '/createdUsers',
               ); // Redirige
             },
-            child: const Text('Aceptar'),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+              ),
+              child: const Text(
+                'Aceptar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ),
         ],
       ),
@@ -258,7 +266,7 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                     children: [
                       // Tipo Cliente
                       TextFormField(
-                        initialValue: 'Persona Natural',
+                        initialValue: 'Persona Jurídica',
                         decoration: _inputDecoration(
                           "Tipo Cliente",
                           "Ingrese su tipo de cliente",
@@ -298,13 +306,13 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                       TextFormField(
                         controller: _nameController,
                         decoration: _inputDecoration(
-                          "Nombre Cliente",
-                          "Ingrese su nombre de cliente",
+                          "Nombre de la Persona Jurídica",
+                          "Ingrese su nombre",
                         ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Nombre del cliente requerido';
+                            return 'Nombre de la persona jurídica requerido';
                           }
                           return null;
                         },
@@ -314,14 +322,11 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                       // Cédula / Pasaporte
                       TextFormField(
                         controller: _identificationController,
-                        decoration: _inputDecoration(
-                          "Cédula / Pasaporte",
-                          "Ingrese su cédula ó pasaporte",
-                        ),
+                        decoration: _inputDecoration("RUC", "Ingrese su RUC"),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Cédula ó pasaporte requerido';
+                            return 'RUC requerido';
                           }
                           return null;
                         },
@@ -386,40 +391,6 @@ class _PersonaNaturalState extends State<PersonaNatural> {
                         },
                       ),
                       const SizedBox(height: 12),
-
-                      // Género
-                      DropdownButtonFormField<String>(
-                        value: _selectedGender,
-                        decoration: _inputDecoration(
-                          "Género",
-                          "Seleccione su género",
-                        ),
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Género requerido';
-                          }
-                          return null;
-                        },
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Masculino',
-                            child: Text('Masculino'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Femenino',
-                            child: Text('Femenino'),
-                          ),
-                          DropdownMenuItem(value: 'Otro', child: Text('Otro')),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGender = value;
-                          });
-                        },
-                        //hint: Text('Seleccione un género'),
-                      ),
-                      const SizedBox(height: 20),
 
                       // Botón registrar
                       SizedBox(

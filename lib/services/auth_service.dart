@@ -45,88 +45,94 @@ class AuthService {
     }
   }
 
-Future<http.Response> get(String endpoint, {BuildContext? context}) async {
-  if (_sessionCookie == null) throw Exception('Sesión no iniciada');
+  Future<http.Response> get(
+    String endpoint, {
+    Map<String, String>? queryParams,
+    BuildContext? context,
+  }) async {
+    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
 
-  final url = apiBase.replace(path: '${apiBase.path}$endpoint');
-  final response = await http.get(url, headers: {
-    'Content-Type': 'application/json',
-    'Cookie': _sessionCookie!,
-  });
+    final url = Uri.parse(
+      '$apiUrl$endpoint',
+    ).replace(queryParameters: queryParams);
 
-  if (response.statusCode == 401 || response.statusCode == 403) {
-    await logout();
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
+    );
 
-    // Muestra alerta si se proporcionó contexto
-    if (context != null && context.mounted) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Sesión expirada'),
-          content: const Text('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
-              },
-              child: const Text('Aceptar'),
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      await logout();
+      if (context != null && context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Sesión expirada'),
+            content: const Text(
+              'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
             ),
-          ],
-        ),
-      );
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login', (_) => false);
+                },
+                child: const Text('Aceptar'),
+              ),
+            ],
+          ),
+        );
+      }
+      throw Exception('Sesión expirada');
     }
 
-    throw Exception('Sesión expirada');
+    return response;
   }
 
-  return response;
-}
 
-// auth_service.dart
-Future<http.Response> post(
-  String endpoint, {
-  Map<String, dynamic>? body,
-  BuildContext? context,
-}) async {
-  if (_sessionCookie == null) throw Exception('Sesión no iniciada');
 
-  final url = apiBase.replace(path: '${apiBase.path}$endpoint');
-  final response = await http.post(
-    url,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cookie': _sessionCookie!,
-    },
-    body: jsonEncode(body ?? {}),
-  );
+  // auth_service.dart
+  Future<http.Response> post(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    BuildContext? context,
+  }) async {
+    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
 
-  if (response.statusCode == 401 || response.statusCode == 403) {
-    await logout(context);
-    throw Exception('Sesión expirada');
+    final url = apiBase.replace(path: '${apiBase.path}$endpoint');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
+      body: jsonEncode(body ?? {}),
+    );
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      await logout();
+      throw Exception('Sesión expirada');
+    }
+
+    return response;
   }
-
-  return response;
-}
 
 Future<http.Response> put(
   String endpoint, {
   Map<String, dynamic>? body,
+  Map<String, String>? queryParams,
   BuildContext? context,
 }) async {
   if (_sessionCookie == null) throw Exception('Sesión no iniciada');
 
-  final url = apiBase.replace(path: '${apiBase.path}$endpoint');
+  final url = Uri.parse('$apiUrl$endpoint').replace(queryParameters: queryParams);
+
   final response = await http.put(
     url,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cookie': _sessionCookie!,
-    },
+    headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
     body: jsonEncode(body ?? {}),
   );
 
   if (response.statusCode == 401 || response.statusCode == 403) {
-    await logout(context);
+    await logout();
     throw Exception('Sesión expirada');
   }
 
@@ -135,13 +141,12 @@ Future<http.Response> put(
 
 
   Future<void> logout([BuildContext? context]) async {
-  _sessionCookie = null;
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('sessionCookie');
+    _sessionCookie = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('sessionCookie');
 
-  if (context != null && context.mounted) {
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    if (context != null && context.mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }
   }
-}
-
 }

@@ -47,8 +47,8 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     final navBarState = Provider.of<NavBarState>(context);
-  final AuthService authService = AuthService();
-  
+    final AuthService authService = AuthService();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -100,47 +100,59 @@ class _NavBarState extends State<NavBar> {
                     width: 5,
                     indent: 15,
                     endIndent: 15,
-                  ),IconButton(
-  icon: Icon(
-    Icons.power_settings_new,
-    color: Colors.white,
-    size: 30,
-  ),
-  onPressed: () {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Column(
-          children: const [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.orange,
-              size: 48,
-            ),
-            SizedBox(height: 10),
-            Text('¿Estás seguro que deseas cerrar sesión?'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo
-            },
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo
-              authService.logout(context); // Ejecuta el logout
-            },
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
-  },
-),
-
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.power_settings_new,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Column(
+                            children: const [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.orange,
+                                size: 48,
+                              ),
+                              SizedBox(height: 10),
+                              Text('¿Estás seguro que deseas cerrar sesión?'),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pop(); // Cierra el diálogo
+                              },
+                              child: const Text('Cancelar'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pop(); // Cierra el diálogo
+                                authService.logout(
+                                  context,
+                                ); // Ejecuta el logout
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                              ),
+                              child: const Text(
+                                'Aceptar',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
