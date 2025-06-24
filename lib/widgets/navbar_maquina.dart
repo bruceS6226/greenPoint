@@ -3,43 +3,24 @@ import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
-class NavBar extends StatefulWidget {
+class NavBarMaquina extends StatefulWidget {
   final Widget child;
 
-  const NavBar({super.key, required this.child});
+  const NavBarMaquina({super.key, required this.child});
 
   @override
-  State<NavBar> createState() => _NavBarState();
+  State<NavBarMaquina> createState() => _NavBarMaquinaState();
 }
 
-class _NavBarState extends State<NavBar> {
+class _NavBarMaquinaState extends State<NavBarMaquina> {
   Widget buildMenuOption({
     required IconData icon,
     required String label,
     required String ruta,
     required String? currentRoute,
   }) {
-    bool isActive;
-    if ((currentRoute!.contains('Users') ||
-            currentRoute.contains('Machines')) &&
-        !currentRoute.contains('userSelection')) {
-      isActive = ruta == currentRoute;
-    } else {
-      if (((currentRoute.contains('user') ||
-          currentRoute.contains('User')) &&
-        !currentRoute.contains('userSelection')) && ruta == '/selectUserType') {
-        isActive = true;
-      } else {
-        if ((currentRoute.contains('machine') ||
-            currentRoute.contains('Machine') ||
-            currentRoute.contains('userSelection')) &&
-                ruta == '/userSelection') {
-          isActive = true;
-        } else {
-          isActive = false;
-        }
-      }
-    }
+    final isActive = ruta == currentRoute;
+
     return GestureDetector(
       onTap: () {
         if (!isActive) {
@@ -250,28 +231,6 @@ class _NavBarState extends State<NavBar> {
                                       ),
                                     ),
                                     const Text(
-                                      "Gestor de Usuarios",
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 12,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    buildMenuOption(
-                                      icon: Icons.group,
-                                      label: 'Ver Usuarios',
-                                      ruta: '/createdUsers',
-                                      currentRoute: currentRoute,
-                                    ),
-                                    buildMenuOption(
-                                      icon: Icons.person_add,
-                                      label: 'Agregar Usuarios',
-                                      ruta: '/selectUserType',
-                                      currentRoute: currentRoute,
-                                    ),
-                                    const SizedBox(height: 15),
-                                    const Text(
                                       "Gestor de Máquinas",
                                       style: TextStyle(
                                         color: Colors.black87,
@@ -281,14 +240,27 @@ class _NavBarState extends State<NavBar> {
                                     ),
                                     const SizedBox(height: 5),
                                     buildMenuOption(
-                                      icon: Icons.group,
-                                      label: 'Ver Máquinas',
+                                      icon: Icons.battery_full,
+                                      label: 'Nivel de Tanques',
+                                      ruta: '/tanks',
+                                      currentRoute: currentRoute,
+                                    ),
+                                    buildMenuOption(
+                                      icon: Icons.sell,
+                                      label: 'Consulta de Ventas',
+                                      ruta: '/selectUserType',
+                                      currentRoute: currentRoute,
+                                    ),
+                                    const SizedBox(height: 5),
+                                    buildMenuOption(
+                                      icon: Icons.attach_money,
+                                      label: 'Ventas Totales',
                                       ruta: '/createdMachines',
                                       currentRoute: currentRoute,
                                     ),
                                     buildMenuOption(
-                                      icon: Icons.person_add,
-                                      label: 'Gestionar Máquinas',
+                                      icon: Icons.insert_chart,
+                                      label: 'Estadísticas Generales',
                                       ruta: '/userSelection',
                                       currentRoute: currentRoute,
                                     ),

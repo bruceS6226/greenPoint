@@ -39,6 +39,8 @@ dependencies:
   dio: ^5.8.0+1
   cookie_jar: ^4.0.8
   shared_preferences: ^2.5.3
+  stomp_dart_client: ^0.4.4
+  web_socket_channel: ^2.4.0
 
 dev_dependencies:
   flutter_test:

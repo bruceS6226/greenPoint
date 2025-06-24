@@ -89,4 +89,27 @@ class MachineService {
       jsonDecode(response.body)['message'] ?? 'Error al cambiar el estado de la máquina',
     );
   }
+
+  Future<Map<String, dynamic>> updateTankLevel({
+  required int machineId,
+  required String product,
+  required int level,
+}) async {
+  final body = {
+    'machineId': machineId,
+    'product': product,
+    'level': level,
+  };
+
+  final response = await _authService.put('$_basePath/update-tank', body: body);
+
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    return jsonDecode(response.body);
+  }
+
+  throw Exception(
+    jsonDecode(response.body)['message'] ?? 'Error al actualizar el nivel del tanque',
+  );
+}
+
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
+import 'package:green_aplication/widgets/mini_encabezado.dart';
 import 'package:provider/provider.dart';
 
 class SeleccionarTipoUsuario extends StatelessWidget {
@@ -22,77 +23,14 @@ class SeleccionarTipoUsuario extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Text(
-                    "Agregar Usuario",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: navBarState.isExpanded ? 43 : 180,
-                    child: navBarState.isExpanded
-                        ? IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/createdUsers");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(14,145,14,1,),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              padding: const EdgeInsets.all(6),
-                            ),icon: const Icon(
-                                Icons.arrow_back,
-                                color: Color.fromRGBO(255, 255, 255, 1),
-                                size: 30,
-                              ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/createdUsers");
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_back,
-                                color: Color.fromRGBO(14, 145, 14, 1),
-                                size: 22,
-                              ),
-                            ),
-                            label: const Text(
-                              "Regresar",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                14,
-                                145,
-                                14,
-                                1,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
+              
+              MiniEncabezado(
+                titulo: "Agregar Usuario",
+                icono: Icons.arrow_back,
+                textoBoton: "Regresar",
+                ruta: "/createdUsers",
               ),
+
               const SizedBox(height: 20),
               Text(
                 "Primero seleccione que tipo de usuario desea registrar",
@@ -110,7 +48,7 @@ class SeleccionarTipoUsuario extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(
-                      context, '/naturalPerson'
+                      context, '/naturalUser'
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -149,7 +87,7 @@ class SeleccionarTipoUsuario extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(
-                      context, '/legalPerson'
+                      context, '/legalUser'
                     );
                   },
                   style: ElevatedButton.styleFrom(

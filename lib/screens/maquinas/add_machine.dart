@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:green_aplication/models/user.dart';
-import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/machine_service.dart';
-import 'package:provider/provider.dart';
+import 'package:green_aplication/widgets/mini_encabezado.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegistrarMaquina extends StatefulWidget {
@@ -150,7 +149,7 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
             actions: [
               TextButton(
                 onPressed: () =>
-                    Navigator.pushReplacementNamed(context, "/createdMachines"),
+                    Navigator.pushReplacementNamed(context, "/tanks"),
                 child: const Text("Aceptar"),
               ),
             ],
@@ -186,7 +185,6 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
 
   @override
   Widget build(BuildContext context) {
-    final navBarState = Provider.of<NavBarState>(context);
 
     if (_user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -209,83 +207,13 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    const Text(
-                      "Información cliente",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    SizedBox(
-                      width: navBarState.isExpanded ? 43 : 180,
-                      child: navBarState.isExpanded
-                          ? IconButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, "/userSelection");
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromRGBO(
-                                  14,
-                                  145,
-                                  14,
-                                  1,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                padding: const EdgeInsets.all(6),
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: Color.fromRGBO(255, 255, 255, 1),
-                                size: 30,
-                              ),
-                            )
-                          : ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.pushNamed(context, "/userSelection");
-                              },
-                              icon: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.arrow_back,
-                                  color: Color.fromRGBO(14, 145, 14, 1),
-                                  size: 22,
-                                ),
-                              ),
-                              label: const Text(
-                                "Regresar",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromRGBO(
-                                  14,
-                                  145,
-                                  14,
-                                  1,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ],
+                MiniEncabezado(
+                  titulo: "Información cliente",
+                  icono: Icons.arrow_back,
+                  textoBoton: "Regresar",
+                  ruta: "/userSelection",
                 ),
+
                 const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
@@ -352,7 +280,7 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
                       _selectedCanton = null;
                     });
                   },
-                        hint: Text('Seleccione una provincia'),
+                  hint: Text('Seleccione una provincia'),
                   validator: (value) => value == null || value.isEmpty
                       ? 'Provincia requerida'
                       : null,

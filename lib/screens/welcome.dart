@@ -53,9 +53,7 @@ class Welcome extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 70),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(
-                      context, '/createdUsers'
-                    );
+                    Navigator.pushNamed(context, '/createdUsers');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -87,7 +85,9 @@ class Welcome extends StatelessWidget {
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 70),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/createdMachines');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     padding: EdgeInsets.all(10),

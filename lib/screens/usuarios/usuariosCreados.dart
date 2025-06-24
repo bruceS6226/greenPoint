@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_aplication/models/user.dart';
-import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/user_service.dart';
-import 'package:provider/provider.dart';
+import 'package:green_aplication/widgets/mini_encabezado.dart';
 
 class UsuariosCreados extends StatefulWidget {
   const UsuariosCreados({super.key});
@@ -28,7 +27,6 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
 
   @override
   Widget build(BuildContext context) {
-    final navBarState = Provider.of<NavBarState>(context);
     return Center(
       child: Container(
         margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
@@ -43,83 +41,12 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Text(
-                    "Usuarios Creados",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
+                    MiniEncabezado(
+                      titulo: "Usuarios Creados",
+                      icono: Icons.add,
+                      textoBoton: "Añadir Usuario",
+                      ruta: "/selectUserType",
                     ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: navBarState.isExpanded ? 43 : 180,
-                    child: navBarState.isExpanded
-                        ? IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/selectUserType");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                14,
-                                145,
-                                14,
-                                1,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              padding: const EdgeInsets.all(6),
-                            ),
-                            icon: const Icon(
-                              Icons.add,
-                              color: Color.fromRGBO(255, 255, 255, 1),
-                              size: 30,
-                            ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/selectUserType");
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: Color.fromRGBO(14, 145, 14, 1),
-                                size: 22,
-                              ),
-                            ),
-                            label: const Text(
-                              "Añadir Usuario",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                14,
-                                145,
-                                14,
-                                1,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
-              ),
 
               const SizedBox(height: 16),
               FutureBuilder<List<User>>(

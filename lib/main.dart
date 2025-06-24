@@ -6,6 +6,8 @@ import 'package:green_aplication/screens/maquinas/add_machine.dart';
 import 'package:green_aplication/screens/maquinas/created_machines.dart';
 import 'package:green_aplication/screens/maquinas/user_selection.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
+import 'package:green_aplication/screens/tanques/tanks_information.dart';
+import 'package:green_aplication/screens/tanques/tanks.dart';
 import 'package:green_aplication/screens/usuarios/add_legal_person.dart';
 import 'package:green_aplication/screens/usuarios/add_natural_person.dart';
 import 'package:green_aplication/screens/usuarios/select-user-type.dart';
@@ -14,6 +16,7 @@ import 'package:green_aplication/screens/usuarios/usuariosCreados.dart';
 import 'package:green_aplication/screens/welcome.dart';
 import 'package:green_aplication/services/auth_service.dart';
 import 'package:green_aplication/widgets/navbar.dart';
+import 'package:green_aplication/widgets/navbar_maquina.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -40,16 +43,18 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const Login(),
         '/recoverPassword': (context) => const RecoverPassword(),
         
-        // ✅ RUTAS PROTEGIDAS
+        // RUTAS PROTEGIDAS
         '/welcome': (context) => AuthGuard(child: NavBar(child: const Welcome())),
         '/createdUsers': (context) => AuthGuard(child: NavBar(child: const UsuariosCreados())),
-        '/naturalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaNatural())),
-        '/legalPerson': (context) => AuthGuard(child: NavBar(child: const PersonaLegal())),
+        '/naturalUser': (context) => AuthGuard(child: NavBar(child: const PersonaNatural())),
+        '/legalUser': (context) => AuthGuard(child: NavBar(child: const PersonaLegal())),
         '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
-        '/userInfo': (context) => NavBar(child: const UserInformacion()),
-        '/userSelection': (context) => NavBar(child: const SeleccionarUsuario()),
-        '/createdMachines': (context) => NavBar(child: const MaquinasCreadas()),
-        '/addMachine': (context) => NavBar(child: const RegistrarMaquina()),
+        '/userInfo': (context) => AuthGuard(child: NavBar(child: const UserInformacion())),
+        '/userSelection': (context) => AuthGuard(child: NavBar(child: const SeleccionarUsuario())),
+        '/createdMachines': (context) => AuthGuard(child: NavBar(child: const MaquinasCreadas())),
+        '/addMachine': (context) => AuthGuard(child: NavBar(child: const RegistrarMaquina())),
+        '/tanks': (context) => AuthGuard(child: NavBarMaquina(child: const Tanques())),
+        '/tankInformation': (context) => AuthGuard(child: NavBarMaquina(child: const InformacionTanque())),
       },
     );
   }

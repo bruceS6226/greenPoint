@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:green_aplication/models/machine.dart';
-import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/machine_service.dart';
 import 'package:green_aplication/services/user_service.dart';
-import 'package:provider/provider.dart';
+import 'package:green_aplication/widgets/mini_encabezado.dart';
 
 class MaquinasCreadas extends StatefulWidget {
   const MaquinasCreadas({super.key});
@@ -15,7 +16,8 @@ class MaquinasCreadas extends StatefulWidget {
 class _MaquinasCreadasState extends State<MaquinasCreadas> {
   late Future<void> _initDataFuture;
   List<Machine> machines = [];
-  Map<int, String> userNamesById = {};
+  List<Map<String, dynamic>> allUsers = []; // Lista completa de usuarios
+  Map<int, String> userNamesById = {}; // Para mostrar nombre en la tabla
 
   @override
   void initState() {
@@ -23,26 +25,26 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
     _initDataFuture = _loadMachinesAndUsers();
   }
 
-  Future<void> _loadMachinesAndUsers() async {
-    final machineService = MachineService();
-    final userService = UserService();
+Future<void> _loadMachinesAndUsers() async {
+  final machineService = MachineService();
+  final userService = UserService();
 
-    final rawMachineList = await machineService.getAll();
-    final userList = await userService.getAll();
+  final rawMachineList = await machineService.getAll();
+  final List<Map<String, dynamic>> userList =
+      List<Map<String, dynamic>>.from(await userService.getAll());
 
-    setState(() {
-      machines = rawMachineList.map((json) => Machine.fromJson(json)).toList();
-      userNamesById = {
-        for (var userJson in userList)
-          userJson['id'] as int: userJson['name'] as String,
-      };
-    });
-  }
+  setState(() {
+    machines = rawMachineList.map((json) => Machine.fromJson(json)).toList();
+    allUsers = userList;
+    userNamesById = {
+      for (var userJson in userList)
+        userJson['id'] as int: userJson['name'] as String,
+    };
+  });
+}
 
   @override
   Widget build(BuildContext context) {
-    final navBarState = Provider.of<NavBarState>(context);
-
     return Center(
       child: Container(
         margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
@@ -57,82 +59,11 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  const Text(
-                    "Máquinas Creadas",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: navBarState.isExpanded ? 43 : 200,
-                    child: navBarState.isExpanded
-                        ? IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/userSelection");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                14,
-                                145,
-                                14,
-                                1,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              padding: const EdgeInsets.all(6),
-                            ),
-                            icon: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          )
-                        : ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "/userSelection");
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: Color.fromRGBO(14, 145, 14, 1),
-                                size: 22,
-                              ),
-                            ),
-                            label: const Text(
-                              "Añadir Máquina",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                14,
-                                145,
-                                14,
-                                1,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
+              MiniEncabezado(
+                titulo: "Máquinas Creadas",
+                icono: Icons.add,
+                textoBoton: "Añadir Máquina",
+                ruta: "/userSelection",
               ),
               const SizedBox(height: 16),
               FutureBuilder<void>(
@@ -158,9 +89,7 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
                         DataColumn(label: Text('Cantón')),
                         DataColumn(label: Text('Sector')),
                         DataColumn(label: Text('Dirección')),
-                        DataColumn(
-                          label: Text('Nombre del Cliente'),
-                        ), // Nueva columna
+                        DataColumn(label: Text('Nombre del Cliente')),
                         DataColumn(label: Text('Acciones')),
                       ],
                       rows: machines.map((machine) {
@@ -176,7 +105,7 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
                               Text(
                                 userNamesById[machine.userId] ?? 'Desconocido',
                               ),
-                            ), // Aquí
+                            ),
                             DataCell(
                               Row(
                                 children: [
@@ -185,9 +114,24 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
                                       Icons.visibility,
                                       color: Colors.blue,
                                     ),
-                                    tooltip: 'Ver detalles',
-                                    onPressed: () {
-                                      // Acción al ver detalles
+                                    onPressed: () async {
+                                      final prefs = await SharedPreferences.getInstance();
+                                      final selectedUser = allUsers.firstWhere(
+                                        (user) => user['id'] == machine.userId,
+                                        orElse: () => {},
+                                      );
+                                      await prefs.setString(
+                                        'SpecificMachine',
+                                        jsonEncode(machine.toJson()),
+                                      );
+                                      await prefs.setString(
+                                        'SpecificUser',
+                                        jsonEncode(selectedUser),
+                                      );
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/tanks',
+                                      );
                                     },
                                   ),
                                 ],
