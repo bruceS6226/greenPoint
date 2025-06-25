@@ -25,29 +25,30 @@ class _MaquinasCreadasState extends State<MaquinasCreadas> {
     _initDataFuture = _loadMachinesAndUsers();
   }
 
-Future<void> _loadMachinesAndUsers() async {
-  final machineService = MachineService();
-  final userService = UserService();
+  Future<void> _loadMachinesAndUsers() async {
+    final machineService = MachineService();
+    final userService = UserService();
 
-  final rawMachineList = await machineService.getAll();
-  final List<Map<String, dynamic>> userList =
-      List<Map<String, dynamic>>.from(await userService.getAll());
+    final rawMachineList = await machineService.getAll();
+    final List<Map<String, dynamic>> userList = List<Map<String, dynamic>>.from(
+      await userService.getAll(),
+    );
 
-  setState(() {
-    machines = rawMachineList.map((json) => Machine.fromJson(json)).toList();
-    allUsers = userList;
-    userNamesById = {
-      for (var userJson in userList)
-        userJson['id'] as int: userJson['name'] as String,
-    };
-  });
-}
+    setState(() {
+      machines = rawMachineList.map((json) => Machine.fromJson(json)).toList();
+      allUsers = userList;
+      userNamesById = {
+        for (var userJson in userList)
+          userJson['id'] as int: userJson['name'] as String,
+      };
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -70,7 +71,11 @@ Future<void> _loadMachinesAndUsers() async {
                 future: _initDataFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return Container(
+                      height: MediaQuery.of(context).size.height - 260,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    );
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   }
@@ -115,7 +120,8 @@ Future<void> _loadMachinesAndUsers() async {
                                       color: Colors.blue,
                                     ),
                                     onPressed: () async {
-                                      final prefs = await SharedPreferences.getInstance();
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
                                       final selectedUser = allUsers.firstWhere(
                                         (user) => user['id'] == machine.userId,
                                         orElse: () => {},
@@ -128,7 +134,7 @@ Future<void> _loadMachinesAndUsers() async {
                                         'SpecificUser',
                                         jsonEncode(selectedUser),
                                       );
-                                      Navigator.pushReplacementNamed(
+                                      Navigator.pushNamed(
                                         context,
                                         '/tanks',
                                       );

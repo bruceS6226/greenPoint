@@ -105,10 +105,10 @@ class _NavBarState extends State<NavBar> {
             top: 0,
             left: 0,
             right: 0,
-            height: 70,
+            height: 80,
             child: Container(
               color: Color.fromRGBO(8, 85, 8, 1),
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
+              padding: const EdgeInsets.only(left: 5, right: 5, top: 25),
               child: Row(
                 children: [
                   // Botón hamburguesa flotante solo cuando está cerrado

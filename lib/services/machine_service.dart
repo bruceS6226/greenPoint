@@ -1,17 +1,22 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:green_aplication/services/auth_service.dart';
-import 'package:green_aplication/config/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MachineService {
   final String _basePath = 'machine';
   final AuthService _authService = AuthService();
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> machine) async {
-    final response = await _authService.post('$_basePath/create', body: machine);
-
+    final response = await _authService.post(
+      '$_basePath/create',
+      body: machine,
+    );
+    final decoded = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body);
+      final machineData = decoded['data'];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('SpecificMachine', jsonEncode(machineData));
+      return machineData;
     }
 
     throw Exception(
@@ -46,7 +51,9 @@ class MachineService {
       return decoded['data'];
     }
 
-    throw Exception(decoded['message'] ?? 'Error al obtener máquinas por usuario');
+    throw Exception(
+      decoded['message'] ?? 'Error al obtener máquinas por usuario',
+    );
   }
 
   Future<List<dynamic>> getAll() async {
@@ -76,7 +83,9 @@ class MachineService {
   Future<bool> updateStatus(int id) async {
     final response = await _authService.put(
       '$_basePath/update-status',
-      body: {'id': id}, // asumimos que tu backend espera un body, no query param
+      body: {
+        'id': id,
+      }, // asumimos que tu backend espera un body, no query param
     );
 
     if (response.statusCode == 200) {
@@ -86,30 +95,30 @@ class MachineService {
     }
 
     throw Exception(
-      jsonDecode(response.body)['message'] ?? 'Error al cambiar el estado de la máquina',
+      jsonDecode(response.body)['message'] ??
+          'Error al cambiar el estado de la máquina',
     );
   }
 
   Future<Map<String, dynamic>> updateTankLevel({
-  required int machineId,
-  required String product,
-  required int level,
-}) async {
-  final body = {
-    'machineId': machineId,
-    'product': product,
-    'level': level,
-  };
+    required int machineId,
+    required String product,
+    required int level,
+  }) async {
+    final body = {'machineId': machineId, 'product': product, 'level': level};
 
-  final response = await _authService.put('$_basePath/update-tank', body: body);
+    final response = await _authService.put(
+      '$_basePath/update-tank',
+      body: body,
+    );
 
-  if (response.statusCode >= 200 && response.statusCode < 300) {
-    return jsonDecode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body);
+    }
+
+    throw Exception(
+      jsonDecode(response.body)['message'] ??
+          'Error al actualizar el nivel del tanque',
+    );
   }
-
-  throw Exception(
-    jsonDecode(response.body)['message'] ?? 'Error al actualizar el nivel del tanque',
-  );
-}
-
 }

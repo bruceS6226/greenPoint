@@ -6,7 +6,7 @@ import 'package:green_aplication/screens/maquinas/add_machine.dart';
 import 'package:green_aplication/screens/maquinas/created_machines.dart';
 import 'package:green_aplication/screens/maquinas/user_selection.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
-import 'package:green_aplication/screens/tanques/tanks_information.dart';
+import 'package:green_aplication/screens/tanques/tank_information.dart';
 import 'package:green_aplication/screens/tanques/tanks.dart';
 import 'package:green_aplication/screens/usuarios/add_legal_person.dart';
 import 'package:green_aplication/screens/usuarios/add_natural_person.dart';
@@ -19,6 +19,7 @@ import 'package:green_aplication/widgets/navbar.dart';
 import 'package:green_aplication/widgets/navbar_maquina.dart';
 import 'package:provider/provider.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AuthService().init(); // inicializa cookie desde storage
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+  navigatorObservers: [routeObserver],
       initialRoute: '/welcome',
       routes: {
         '/login': (context) => const Login(),

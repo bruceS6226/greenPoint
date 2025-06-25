@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:green_aplication/models/machine.dart';
+import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
 import 'package:green_aplication/services/auth_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NavBarMaquina extends StatefulWidget {
   final Widget child;
@@ -13,14 +18,49 @@ class NavBarMaquina extends StatefulWidget {
 }
 
 class _NavBarMaquinaState extends State<NavBarMaquina> {
+  User? user;
+  Machine? machine;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSpecificUserAndMachine();
+  }
+
+  Map<String, dynamic>? userData;
+  Map<String, dynamic>? machineData;
+
+  Future<void> _loadSpecificUserAndMachine() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonUserString = prefs.getString('SpecificUser');
+    final jsonMachineString = prefs.getString('SpecificMachine');
+
+    if (jsonUserString != null && jsonMachineString != null) {
+      setState(() {
+        userData = jsonDecode(jsonUserString);
+        machineData = jsonDecode(jsonMachineString);
+        user = User.fromJson(userData!);
+        machine = Machine.fromJson(machineData!);
+      });
+    }
+  }
+
   Widget buildMenuOption({
     required IconData icon,
     required String label,
     required String ruta,
     required String? currentRoute,
   }) {
-    final isActive = ruta == currentRoute;
-
+    bool isActive = ruta == currentRoute;
+    if (currentRoute == ruta) {
+      isActive = ruta == currentRoute;
+    } else {
+      if (currentRoute!.contains('tank') && ruta == '/tanks') {
+        isActive = true;
+      } else {
+        isActive = false;
+      }
+    }
     return GestureDetector(
       onTap: () {
         if (!isActive) {
@@ -64,6 +104,9 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
 
   @override
   Widget build(BuildContext context) {
+    if (user == null || machine == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final navBarState = Provider.of<NavBarState>(context);
     final AuthService authService = AuthService();
     final currentRoute = ModalRoute.of(context)?.settings.name;
@@ -86,14 +129,13 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
             top: 0,
             left: 0,
             right: 0,
-            height: 70,
+            height: 85,
             child: Container(
               color: Color.fromRGBO(8, 85, 8, 1),
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
+              padding: const EdgeInsets.only(left: 5, right: 5, top: 25),
               child: Row(
                 children: [
-                  // Botón hamburguesa flotante solo cuando está cerrado
-                  if (!navBarState.isExpanded)
+                  if (!navBarState.isExpanded) ...[
                     GestureDetector(
                       onTap: () {
                         navBarState.expand();
@@ -107,7 +149,30 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
                         ),
                       ),
                     ),
-                  Spacer(), // Empuja los iconos a la derecha
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 6),
+                        Text(
+                          machine!.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 19,
+                          ),
+                        ),
+                        Text(
+                          user!.name,
+                          style: const TextStyle(
+                            color: Colors.yellowAccent,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const Spacer(), // Empuja los iconos a la derecha
                   // Iconos a la derecha
                   IconButton(
                     icon: Icon(Icons.person, color: Colors.white, size: 30),
@@ -295,7 +360,6 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
                       )
                     : null,
               ),
-
               // Contenido principal
               Expanded(child: widget.child),
             ],

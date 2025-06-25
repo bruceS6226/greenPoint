@@ -163,7 +163,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
 
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,

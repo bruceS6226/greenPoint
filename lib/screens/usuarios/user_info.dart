@@ -54,10 +54,9 @@ class _UserInformacionState extends State<UserInformacion> {
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -66,7 +65,13 @@ class _UserInformacionState extends State<UserInformacion> {
         width: double.infinity,
         height: double.infinity,
         child: _user == null
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Container(
+                  height: MediaQuery.of(context).size.height - 260,
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator(),
+                ),
+              )
             : SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/services/machine_service.dart';
+import 'package:green_aplication/widgets/mensajes.dart';
 import 'package:green_aplication/widgets/mini_encabezado.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,7 +45,11 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
         _user = user;
       });
     } else {
-      _showErrorDialog("No se encontró el usuario actual.");
+      Mensajes.mostrarMensaje(
+        context,
+        "No se encontró el usuario actual.",
+        TipoMensaje.error,
+      );
     }
   }
 
@@ -115,8 +120,10 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_user?.id == null) {
-      _showErrorDialog(
+      Mensajes.mostrarMensaje(
+        context,
         "No se pudo registrar la máquina porque no se encontró el usuario.",
+        TipoMensaje.error,
       );
       return;
     }
@@ -139,25 +146,19 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
       final response = await _machineService.create(newMachine);
 
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Máquina registrada"),
-            content: Text(
-              "La máquina '${response['data']['name']}' fue registrada exitosamente.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, "/tanks"),
-                child: const Text("Aceptar"),
-              ),
-            ],
-          ),
+        Mensajes.mostrarMensaje(
+          context,
+          "La máquina '${response['name']}' fue registrada exitosamente.",
+          TipoMensaje.success,
         );
+        Navigator.pushReplacementNamed(context, "/tanks");
       }
     } catch (e) {
-      _showErrorDialog("Error al registrar la máquina: $e");
+      Mensajes.mostrarMensaje(
+        context,
+        "Error al registrar la máquina: $e",
+        TipoMensaje.error,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -167,32 +168,15 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Error"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cerrar"),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-
     if (_user == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,

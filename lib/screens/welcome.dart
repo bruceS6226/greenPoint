@@ -15,7 +15,7 @@ class Welcome extends StatelessWidget {
           margin: const EdgeInsets.only(
             left: 10,
             right: 10,
-            top: 78,
+            top: 90,
             bottom: 8,
           ),
           padding: navBarState.isExpanded

@@ -29,7 +29,7 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -41,19 +41,23 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-                    MiniEncabezado(
-                      titulo: "Usuarios Creados",
-                      icono: Icons.add,
-                      textoBoton: "Añadir Usuario",
-                      ruta: "/selectUserType",
-                    ),
+              MiniEncabezado(
+                titulo: "Usuarios Creados",
+                icono: Icons.add,
+                textoBoton: "Añadir Usuario",
+                ruta: "/selectUserType",
+              ),
 
               const SizedBox(height: 16),
               FutureBuilder<List<User>>(
                 future: _usersFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return Container(
+                      height: MediaQuery.of(context).size.height - 260,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    );
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

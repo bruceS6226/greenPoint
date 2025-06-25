@@ -47,10 +47,9 @@ class _SeleccionarUsuarioState extends State<SeleccionarUsuario> {
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10, top: 78, bottom: 8),
+        margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -64,14 +63,18 @@ class _SeleccionarUsuarioState extends State<SeleccionarUsuario> {
             children: [
               MiniEncabezado(
                 titulo: "Agregar máquina",
-                icono: Icons.add,
-                textoBoton: "Añadir Máquina",
-                ruta: "/userSelection",
+                icono: Icons.arrow_back,
+                textoBoton: "Regresar",
+                ruta: "/createdMachines",
               ),
 
               const SizedBox(height: 25),
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? Container(
+                      height: MediaQuery.of(context).size.height - 260,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    )
                   : Form(
                       key: _formKey,
                       child: Column(

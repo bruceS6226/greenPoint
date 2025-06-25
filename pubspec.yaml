@@ -40,7 +40,9 @@ dependencies:
   cookie_jar: ^4.0.8
   shared_preferences: ^2.5.3
   stomp_dart_client: ^0.4.4
-  web_socket_channel: ^2.4.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -96,3 +98,15 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   assets:
     - assets/images/
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo-punto-verde.png" 
+
+flutter_native_splash:
+  color: "#0E910E" # Color de fondo en hexadecimal
+  #image: assets/images/logo-punto-verde.png
+  android: true
+  ios: true
