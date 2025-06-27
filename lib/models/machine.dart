@@ -1,11 +1,11 @@
 class Machine {
   final int? id;
-  final String name;
-  final String province;
-  final String canton;
-  final String sector;
-  final String address;
-  final int userId;
+  String name;
+  String province;
+  String canton;
+  String sector;
+  String address;
+  int userId;
   final bool active;
 
   Machine({

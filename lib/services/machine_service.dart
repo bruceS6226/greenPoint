@@ -23,6 +23,20 @@ class MachineService {
       jsonDecode(response.body)['message'] ?? 'Error al crear la máquina',
     );
   }
+  
+Future<bool> update(Map<String, dynamic> machine) async {
+  final response = await _authService.put('$_basePath/update', body: machine);
+
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    return true;
+  }
+
+  final decoded = jsonDecode(response.body);
+  throw Exception(
+    decoded['message'] ?? 'Error al actualizar la máquina',
+  );
+}
+
 
   Future<Map<String, dynamic>> getById(int id) async {
     final response = await _authService.get(
@@ -68,17 +82,7 @@ class MachineService {
     throw Exception(decoded['message'] ?? 'Error al obtener las máquinas');
   }
 
-  Future<Map<String, dynamic>> update(Map<String, dynamic> machine) async {
-    final response = await _authService.put('$_basePath/update', body: machine);
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
-
-    throw Exception(
-      jsonDecode(response.body)['message'] ?? 'Error al actualizar la máquina',
-    );
-  }
 
   Future<bool> updateStatus(int id) async {
     final response = await _authService.put(

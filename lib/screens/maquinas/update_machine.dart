@@ -3,47 +3,61 @@ import 'package:flutter/material.dart';
 import 'package:green_aplication/models/machine.dart';
 import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/services/machine_service.dart';
+import 'package:green_aplication/services/user_service.dart';
 import 'package:green_aplication/widgets/mensajes.dart';
 import 'package:green_aplication/widgets/mini_encabezado.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RegistrarMaquina extends StatefulWidget {
-  const RegistrarMaquina({super.key});
+class ActualizarMaquina extends StatefulWidget {
+  const ActualizarMaquina({super.key});
 
   @override
-  State<RegistrarMaquina> createState() => _RegistrarMaquinaState();
+  State<ActualizarMaquina> createState() => _ActualizarMaquinaState();
 }
 
-class _RegistrarMaquinaState extends State<RegistrarMaquina> {
+class _ActualizarMaquinaState extends State<ActualizarMaquina> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final MachineService _machineService = MachineService();
 
-  late TextEditingController _nameController;
-  late TextEditingController _sectorController;
-  late TextEditingController _addressController;
+  late TextEditingController _nameController = TextEditingController();
+  late TextEditingController _sectorController = TextEditingController();
+  late TextEditingController _addressController = TextEditingController();
   String? _selectedProvince;
   String? _selectedCanton;
 
-  User? _user;
+  List<Map<String, dynamic>> allUsers = [];
+  User? selectedUser;
+  Machine? machine;
   bool _isLoading = false;
+  final UserService _userService = UserService();
+  List<User> users = [];
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _sectorController = TextEditingController();
-    _addressController = TextEditingController();
-    _loadUser();
+    _loadInformation();
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _loadInformation() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('SpecificUser');
-    if (jsonString != null) {
-      final jsonData = jsonDecode(jsonString);
-      final user = User.fromJson(jsonData);
+    final jsonStringUser = prefs.getString('SpecificUser');
+    final jsonStringMachine = prefs.getString('SpecificMachine');
+    if (jsonStringUser != null && jsonStringMachine != null) {
+      final jsonDataUser = jsonDecode(jsonStringUser);
+      final jsonDataMachine = jsonDecode(jsonStringMachine);
+      final data = await _userService.getAll();
       setState(() {
-        _user = user;
+        users = data.map((json) => User.fromJson(json)).toList();
+        machine = Machine.fromJson(jsonDataMachine);
+        selectedUser = users.firstWhere(
+          (u) => u.id == jsonDataUser['id'],
+          orElse: () => users.first,
+        );
+        _nameController.text = machine!.name;
+        _sectorController.text = machine!.sector;
+        _addressController.text = machine!.address;
+        _selectedProvince = machine!.province;
+        _selectedCanton = machine!.canton;
       });
     } else {
       Mensajes.mostrarMensaje(
@@ -117,61 +131,62 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
     );
   }
 
-  Future<void> _registerMachine() async {
-    if (!_formKey.currentState!.validate()) return;
+Future<void> _updateMachine() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    if (_user?.id == null) {
+  if (selectedUser?.id == null) {
+    Mensajes.mostrarMensaje(
+      context,
+      "No se pudo actualizar la máquina porque no se encontró el usuario.",
+      TipoMensaje.error,
+    );
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  machine!
+    //..name = _nameController.text
+    ..sector = _sectorController.text
+    ..address = _addressController.text
+    ..province = _selectedProvince ?? machine!.province
+    ..canton = _selectedCanton ?? machine!.canton
+    ..userId = selectedUser!.id;
+
+  try {
+    final response = await _machineService.update(machine!.toJson());
+
+    if (response) {
       Mensajes.mostrarMensaje(
         context,
-        "No se pudo registrar la máquina porque no se encontró el usuario.",
-        TipoMensaje.error,
+        "La máquina '${machine!.name}' fue actualizada exitosamente.",
+        TipoMensaje.success,
       );
-      return;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('SpecificMachine', jsonEncode(machine));
+      Navigator.pushReplacementNamed(context, "/tanks");
     }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final newMachine = Machine(
-        name: _nameController.text,
-        province: _selectedProvince!,
-        canton: _selectedCanton!,
-        sector: _sectorController.text,
-        address: _addressController.text,
-        userId: _user?.id ?? 0,
-        active: true,
-      );
-
-      final response = await _machineService.create(newMachine.toJson());
-
-      if (mounted) {
-        Mensajes.mostrarMensaje(
-          context,
-          "La máquina '${response['name']}' fue registrada exitosamente.",
-          TipoMensaje.success,
-        );
-        Navigator.pushReplacementNamed(context, "/tanks");
-      }
-    } catch (e) {
-      Mensajes.mostrarMensaje(
-        context,
-        "Error al registrar la máquina: $e",
-        TipoMensaje.error,
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+  } catch (e) {
+    Mensajes.mostrarMensaje(
+      context,
+      "Error al actualizar la máquina: $e",
+      TipoMensaje.error,
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    if (machine == null && selectedUser == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -193,51 +208,42 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 MiniEncabezado(
-                  titulo: "Información cliente",
+                  titulo: "Actualizar Máquina",
                   icono: Icons.arrow_back,
                   textoBoton: "Regresar",
                   ruta: "/userSelection",
                 ),
+                const SizedBox(height: 30),
 
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(234, 234, 234, 1),
-                    borderRadius: BorderRadius.circular(15),
+                DropdownButtonFormField<User>(
+                  decoration: InputDecoration(
+                    labelText: 'Usuario Asignado a la Máquina',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 5,
-                    horizontal: 10,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      infoRow(
-                        "Tipo de Cliente:",
-                        _user!.naturalPerson ? "Natural" : "Jurídico",
-                      ),
-                      infoRow("Rol:", _user!.role),
-                      infoRow("Nombre:", _user!.name),
-                      infoRow("Identificación:", _user!.identification),
-                      infoRow("Email:", _user!.email),
-                      infoRow("Teléfono:", _user!.phone),
-                      infoRow("Dirección:", _user!.address),
-                      infoRow("Género:", _user!.gender),
-                    ],
-                  ),
+                  items: users.map((user) {
+                    return DropdownMenuItem<User>(
+                      value: user,
+                      child: Text(user.name),
+                    );
+                  }).toList(),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  value: selectedUser,
+                  onChanged: (user) {
+                    setState(() {
+                      selectedUser = user;
+                      if (machine != null && user != null) {
+                        machine!.userId = user.id;
+                      }
+                    });
+                  },
+                  hint: Text('Seleccione un usuario'),
+                  validator: (value) =>
+                      value == null ? 'Debe seleccionar un usuario' : null,
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  "Agregar Máquina",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                TextFormField(
+                const SizedBox(height: 12),
+                /*TextFormField(
                   controller: _nameController,
                   decoration: _inputDecoration(
                     "Nombre de la máquina",
@@ -247,12 +253,11 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
                   validator: (value) => (value == null || value.isEmpty)
                       ? 'Nombre de la máquina requerido'
                       : null,
-                ),
-                const SizedBox(height: 12),
+                ),*/
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   decoration: _inputDecoration("Provincia", ""),
-                  value: _selectedProvince, // null por defecto
+                  value: _selectedProvince,
                   items: provincesCities.keys.map((province) {
                     return DropdownMenuItem(
                       value: province,
@@ -260,11 +265,17 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
                     );
                   }).toList(),
                   onChanged: (value) {
-                    setState(() {
-                      _selectedProvince = value;
-                      _selectedCanton = null;
-                    });
-                  },
+  setState(() {
+    _selectedProvince = value;
+    // Resetear cantón al cambiar de provincia
+    if (_selectedProvince != machine!.province) {
+      _selectedCanton = null;
+    } else {
+      _selectedCanton = machine!.canton;
+    }
+  });
+},
+
                   hint: Text('Seleccione una provincia'),
                   validator: (value) => value == null || value.isEmpty
                       ? 'Provincia requerida'
@@ -321,7 +332,7 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _registerMachine,
+                    onPressed: _isLoading ? null : _updateMachine,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _isLoading
                           ? Colors.grey
@@ -341,7 +352,7 @@ class _RegistrarMaquinaState extends State<RegistrarMaquina> {
                             ),
                           )
                         : const Text(
-                            "Registrar Máquina",
+                            "Actualizar Máquina",
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                   ),

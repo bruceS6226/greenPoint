@@ -48,7 +48,7 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
   Widget buildMenuOption({
     required IconData icon,
     required String label,
-    required String ruta,
+    required String? ruta,
     required String? currentRoute,
   }) {
     bool isActive = ruta == currentRoute;
@@ -64,7 +64,7 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
     return GestureDetector(
       onTap: () {
         if (!isActive) {
-          Navigator.pushNamed(context, ruta);
+          Navigator.pushNamed(context, ruta!);
         }
       },
       child: Container(
@@ -247,7 +247,7 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
               // Menú lateral expandido
               AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
-                width: navBarState.isExpanded ? 75 : 0,
+                width: navBarState.isExpanded ? 77 : 0,
                 color: navBarState.isExpanded
                     ? Colors.white
                     : Colors.transparent,
@@ -313,20 +313,20 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
                                     buildMenuOption(
                                       icon: Icons.sell,
                                       label: 'Consulta de Ventas',
-                                      ruta: '/selectUserType',
+                                      ruta: '/daySales',
                                       currentRoute: currentRoute,
                                     ),
                                     const SizedBox(height: 5),
                                     buildMenuOption(
                                       icon: Icons.attach_money,
                                       label: 'Ventas Totales',
-                                      ruta: '/createdMachines',
+                                      ruta: '',
                                       currentRoute: currentRoute,
                                     ),
                                     buildMenuOption(
                                       icon: Icons.insert_chart,
                                       label: 'Estadísticas Generales',
-                                      ruta: '/userSelection',
+                                      ruta: '',
                                       currentRoute: currentRoute,
                                     ),
                                   ],
@@ -334,25 +334,37 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
                               ),
                             ),
 
-                            // Botón colapsar al fondo
+                            buildMenuOption(
+                              icon: Icons.settings,
+                              label: 'Configuración Máquina',
+                              ruta: '/updateMachine',
+                              currentRoute: currentRoute,
+                            ),
+                            const SizedBox(height: 5),
+                            // Botón colapsar y configurar al fondo
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  navBarState.collapse();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: const BoxDecoration(
-                                    color: Color.fromRGBO(8, 85, 8, 1),
-                                    shape: BoxShape.circle,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      navBarState.collapse();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(
+                                        color: Color.fromRGBO(8, 85, 8, 1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.arrow_back_ios,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.arrow_back_ios,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
+                                ],
                               ),
                             ),
                           ],

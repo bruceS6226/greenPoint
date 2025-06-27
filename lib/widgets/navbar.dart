@@ -201,7 +201,7 @@ class _NavBarState extends State<NavBar> {
               // Menú lateral expandido
               AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
-                width: navBarState.isExpanded ? 75 : 0,
+                width: navBarState.isExpanded ? 77 : 0,
                 color: navBarState.isExpanded
                     ? Colors.white
                     : Colors.transparent,

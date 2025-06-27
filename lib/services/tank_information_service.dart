@@ -5,7 +5,7 @@ class InformationService {
   final String _basePath = 'information';
   final AuthService _authService = AuthService();
 
-  Future<List<dynamic>> getTankInfo(int machineId) async {
+  Future<List<dynamic>> getTanksInfo(int machineId) async {
     final response = await _authService.get('$_basePath/tank-info', queryParams: {
       'machineId': machineId.toString(),
     });
@@ -38,11 +38,12 @@ class InformationService {
     throw Exception(jsonDecode(response.body)['message'] ?? 'Error al obtener estadísticas');
   }
 
-  Future<List<dynamic>> getSalesInfo(int machineId) async {
+  Future<List<dynamic>> getSalesInfo(int machineId, String date) async {
     final response = await _authService.get('$_basePath/sales', queryParams: {
-      'machineId': machineId.toString(),
+      'machineId': machineId.toString(), 'date': date,
     });
 
+    print(response.body);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     }
