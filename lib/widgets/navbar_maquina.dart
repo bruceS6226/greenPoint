@@ -320,13 +320,13 @@ class _NavBarMaquinaState extends State<NavBarMaquina> {
                                     buildMenuOption(
                                       icon: Icons.attach_money,
                                       label: 'Ventas Totales',
-                                      ruta: '',
+                                      ruta: '/monthSales',
                                       currentRoute: currentRoute,
                                     ),
                                     buildMenuOption(
                                       icon: Icons.insert_chart,
                                       label: 'Estadísticas Generales',
-                                      ruta: '',
+                                      ruta: '/statics',
                                       currentRoute: currentRoute,
                                     ),
                                   ],

@@ -7,15 +7,18 @@ import 'package:green_aplication/screens/maquinas/add_machine.dart';
 import 'package:green_aplication/screens/maquinas/created_machines.dart';
 import 'package:green_aplication/screens/maquinas/update_machine.dart';
 import 'package:green_aplication/screens/maquinas/user_selection.dart';
-import 'package:green_aplication/screens/recoverPassword.dart';
-import 'package:green_aplication/screens/tanques/information/daySales.dart';
+import 'package:green_aplication/screens/recover_password.dart';
+import 'package:green_aplication/screens/tanques/information/day_sales.dart';
+import 'package:green_aplication/screens/tanques/information/month_sales.dart';
+import 'package:green_aplication/screens/tanques/information/stadistics.dart';
 import 'package:green_aplication/screens/tanques/tank_information.dart';
 import 'package:green_aplication/screens/tanques/tanks.dart';
 import 'package:green_aplication/screens/usuarios/add_legal_person.dart';
 import 'package:green_aplication/screens/usuarios/add_natural_person.dart';
-import 'package:green_aplication/screens/usuarios/select-user-type.dart';
+import 'package:green_aplication/screens/usuarios/select_user_type.dart';
+import 'package:green_aplication/screens/usuarios/update_user.dart';
 import 'package:green_aplication/screens/usuarios/user_info.dart';
-import 'package:green_aplication/screens/usuarios/usuariosCreados.dart';
+import 'package:green_aplication/screens/usuarios/usuarios_creados.dart';
 import 'package:green_aplication/screens/welcome.dart';
 import 'package:green_aplication/services/auth_service.dart';
 import 'package:green_aplication/widgets/navbar.dart';
@@ -59,22 +62,28 @@ class MyApp extends StatelessWidget {
       initialRoute: '/welcome',
       routes: {
         '/login': (context) => const Login(),
-        '/recoverPassword': (context) => const RecoverPassword(),
+        '/recoverPassword': (context) => const RecuperarContrasenia(),
 
         // RUTAS PROTEGIDAS
         '/welcome': (context) => AuthGuard(child: NavBar(child: const Welcome())),
+        
+        '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
         '/createdUsers': (context) => AuthGuard(child: NavBar(child: const UsuariosCreados())),
         '/naturalUser': (context) => AuthGuard(child: NavBar(child: const PersonaNatural())),
         '/legalUser': (context) => AuthGuard(child: NavBar(child: const PersonaLegal())),
-        '/selectUserType': (context) => AuthGuard(child: NavBar(child: const SeleccionarTipoUsuario())),
         '/userInfo': (context) => AuthGuard(child: NavBar(child: const UserInformacion())),
+        '/updateUser': (context) => AuthGuard(child: NavBar(child: const ActualizarUsuario())),
+
         '/userSelection': (context) => AuthGuard(child: NavBar(child: const SeleccionarUsuario())),
         '/createdMachines': (context) => AuthGuard(child: NavBar(child: const MaquinasCreadas())),
         '/addMachine': (context) => AuthGuard(child: NavBar(child: const RegistrarMaquina())),
+
         '/tanks': (context) => AuthGuard(child: NavBarMaquina(child: const Tanques())),
         '/tankInformation': (context) => AuthGuard(child: NavBarMaquina(child: const InformacionTanque())),
         '/updateMachine': (context) => AuthGuard(child: NavBarMaquina(child: const ActualizarMaquina())),
         '/daySales': (context) => AuthGuard(child: NavBarMaquina(child: const VentasDiarias())),
+        '/monthSales': (context) => AuthGuard(child: NavBarMaquina(child: const VentasTotales())),
+        '/statics': (context) => AuthGuard(child: NavBarMaquina(child: const Estadisticas())),
       },
     );
   }

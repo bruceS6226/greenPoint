@@ -238,7 +238,36 @@ class _UsuariosCreadosState extends State<UsuariosCreados> {
                                       color: Colors.orange,
                                     ),
                                     tooltip: 'Editar',
-                                    onPressed: () async {},
+                                    onPressed: () async {
+                                      try {
+                                        final userService = UserService();
+                                        await userService.getById(user.id);
+
+                                        if (context.mounted) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            "/updateUser",
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Error'),
+                                              content: Text(e.toString()),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('Cerrar'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
                                   ),
                                 ],
                               ),

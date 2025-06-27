@@ -1,14 +1,14 @@
 class User {
   final int id;
-  final String email;
-  final String name;
-  final String identification;
-  final String phone;
+  String email;
+  String name;
+  String identification;
+  String phone;
   final bool naturalPerson;
-  final String gender;
-  final String address;
-  final String role;
-  final bool active;
+  String gender;
+  String address;
+  String role;
+  bool active;
 
   User({
     required this.id,

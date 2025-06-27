@@ -32,12 +32,17 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final rawCookie = response.headers['set-cookie'];
+      final responseData = jsonDecode(response.body);
+      final prefs = await SharedPreferences.getInstance();
+
       if (rawCookie != null) {
         _sessionCookie = rawCookie.split(';').first;
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('sessionCookie', _sessionCookie!);
+        prefs.setString('sessionCookie', _sessionCookie!);
       }
+
+      final userData = responseData['data'];
+      prefs.setString('user', jsonEncode(userData));
     } else {
       final msg =
           jsonDecode(response.body)['message'] ?? 'Error de autenticación';
@@ -50,67 +55,38 @@ class AuthService {
     Map<String, String>? queryParams,
     BuildContext? context,
   }) async {
-    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
-
     final url = Uri.parse(
       '$apiUrl$endpoint',
     ).replace(queryParameters: queryParams);
-
-    final response = await http.get(
-      url,
-      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
+    return _handleAuthRequest(
+      () => http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': _sessionCookie!,
+        },
+      ),
+      context: context,
     );
-
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      await logout();
-      if (context != null && context.mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Sesión expirada'),
-            content: const Text(
-              'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/login', (_) => false);
-                },
-                child: const Text('Aceptar'),
-              ),
-            ],
-          ),
-        );
-      }
-      throw Exception('Sesión expirada');
-    }
-
-    return response;
   }
 
-  // auth_service.dart
   Future<http.Response> post(
     String endpoint, {
     Map<String, dynamic>? body,
     BuildContext? context,
   }) async {
-    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
-
-    final url = apiBase.replace(path: '${apiBase.path}$endpoint');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
-      body: jsonEncode(body ?? {}),
+    final url = Uri.parse('$apiUrl$endpoint');
+    return _handleAuthRequest(
+      () => http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': _sessionCookie!,
+        },
+        body: jsonEncode(body ?? {}),
+      ),
+      context: context,
     );
-
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      await logout();
-      throw Exception('Sesión expirada');
-    }
-
-    return response;
   }
 
   Future<http.Response> put(
@@ -119,24 +95,20 @@ class AuthService {
     Map<String, String>? queryParams,
     BuildContext? context,
   }) async {
-    if (_sessionCookie == null) throw Exception('Sesión no iniciada');
-
     final url = Uri.parse(
       '$apiUrl$endpoint',
     ).replace(queryParameters: queryParams);
-
-    final response = await http.put(
-      url,
-      headers: {'Content-Type': 'application/json', 'Cookie': _sessionCookie!},
-      body: jsonEncode(body ?? {}),
+    return _handleAuthRequest(
+      () => http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': _sessionCookie!,
+        },
+        body: jsonEncode(body ?? {}),
+      ),
+      context: context,
     );
-
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      await logout();
-      throw Exception('Sesión expirada');
-    }
-
-    return response;
   }
 
   Future<void> logout([BuildContext? context]) async {
@@ -148,4 +120,91 @@ class AuthService {
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
+
+  bool _isRefreshing = false;
+
+  Future<bool> refreshToken() async {
+    if (_isRefreshing) return false;
+    _isRefreshing = true;
+
+    try {
+      final url = Uri.parse('$apiUrl/user/auth/refresh');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      _isRefreshing = false;
+
+      if (response.statusCode == 200) {
+        final rawCookie = response.headers['set-cookie'];
+        if (rawCookie != null) {
+          _sessionCookie = rawCookie.split(';').first;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('sessionCookie', _sessionCookie!);
+          return true;
+        }
+        return true;
+      }
+
+      return false;
+    } catch (_) {
+      _isRefreshing = false;
+      return false;
+    }
+  }
+
+  Future<http.Response> _handleAuthRequest(
+    Future<http.Response> Function() request, {
+    BuildContext? context,
+  }) async {
+    final response = await request();
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      final refreshed = await refreshToken();
+      if (refreshed) {
+        return await request(); // Reintenta
+      } else {
+        await logout(context);
+        if (context != null && context.mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+        }
+        throw Exception('Sesión expirada');
+      }
+    }
+
+    return response;
+  }
+
+  Future<void> requestPasswordChange(String email) async {
+  final url = Uri.parse('${apiUrl}user/forgot-password')
+      .replace(queryParameters: {'email': email});
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+  );
+
+  if (response.statusCode != 200) {
+    final msg = jsonDecode(response.body)['message'] ?? 'Error al solicitar recuperación';
+    throw Exception(msg);
+  }
+}
+
+Future<void> resetPassword(String token, String newPassword) async {
+  final url = Uri.parse('$apiUrl/reset-password')
+      .replace(queryParameters: {'token': token});
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'newPassword': newPassword}),
+  );
+
+  if (response.statusCode != 200) {
+    final msg = jsonDecode(response.body)['message'] ?? 'Error al restablecer contraseña';
+    throw Exception(msg);
+  }
+}
+
 }

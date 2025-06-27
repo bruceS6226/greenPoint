@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_aplication/screens/recoverPassword.dart';
 import 'package:green_aplication/services/auth_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -216,12 +217,19 @@ class _LoginState extends State<Login> {
 
                     // Registro
                     TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "¿Quieres ser parte de Punto Green?",
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
-                      ),
-                    ),
+  onPressed: () async {
+    final Uri url = Uri.parse('https://puntogreen.club/contactos/');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication); // o LaunchMode.inAppBrowserView si lo prefieres
+    } else {
+      throw 'No se pudo abrir la URL';
+    }
+  },
+  child: const Text(
+    "¿Quieres ser parte de Punto Green?",
+    style: TextStyle(fontSize: 14, color: Colors.black87),
+  ),
+),
 
                     const SizedBox(height: 10),
                   ],

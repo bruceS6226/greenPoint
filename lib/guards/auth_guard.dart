@@ -14,7 +14,7 @@ class AuthGuard extends StatelessWidget {
     if (authService.isLoggedIn) {
       return child;
     } else {
-      return const Login(); // Redirige si no hay sesión
+      return const Login();
     }
   }
 }

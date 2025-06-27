@@ -1,15 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:green_aplication/main.dart';
+import 'package:green_aplication/models/information.dart';
 import 'package:green_aplication/models/machine.dart';
-import 'package:green_aplication/models/tank.dart';
 import 'package:green_aplication/providers/navbar_provider.dart';
-import 'package:green_aplication/services/file_service.dart';
 import 'package:green_aplication/services/tank_information_service.dart';
-import 'package:green_aplication/widgets/mensajes.dart';
 import 'package:green_aplication/widgets/mini_encabezado.dart';
-import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -445,27 +440,30 @@ class _VentasDiariasState extends State<VentasDiarias> {
                               ],
                             ),
                             ...selectedBills.billsInfo.map(
-                              (b) => TableRow(
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.all(8),
-                                    child: Text("Factura"),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(
-                                      b.id.trim().isNotEmpty ? b.id : "",
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(
-                                      "\$${b.total.toStringAsFixed(2)}",
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+  (b) => TableRow(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          b.id == '9999999999999' ? 'Consumidor Final' : 'Factura',
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          b.id.trim().isNotEmpty ? b.id : "",
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          "\$${b.total.toStringAsFixed(2)}",
+        ),
+      ),
+    ],
+  ),
+),
+
                           ],
                         ),
                       );

@@ -131,58 +131,57 @@ class _ActualizarMaquinaState extends State<ActualizarMaquina> {
     );
   }
 
-Future<void> _updateMachine() async {
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _updateMachine() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  if (selectedUser?.id == null) {
-    Mensajes.mostrarMensaje(
-      context,
-      "No se pudo actualizar la máquina porque no se encontró el usuario.",
-      TipoMensaje.error,
-    );
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  machine!
-    //..name = _nameController.text
-    ..sector = _sectorController.text
-    ..address = _addressController.text
-    ..province = _selectedProvince ?? machine!.province
-    ..canton = _selectedCanton ?? machine!.canton
-    ..userId = selectedUser!.id;
-
-  try {
-    final response = await _machineService.update(machine!.toJson());
-
-    if (response) {
+    if (selectedUser?.id == null) {
       Mensajes.mostrarMensaje(
         context,
-        "La máquina '${machine!.name}' fue actualizada exitosamente.",
-        TipoMensaje.success,
+        "No se pudo actualizar la máquina porque no se encontró el usuario.",
+        TipoMensaje.error,
       );
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('SpecificMachine', jsonEncode(machine));
-      Navigator.pushReplacementNamed(context, "/tanks");
+      return;
     }
-  } catch (e) {
-    Mensajes.mostrarMensaje(
-      context,
-      "Error al actualizar la máquina: $e",
-      TipoMensaje.error,
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    machine!
+      //..name = _nameController.text
+      ..sector = _sectorController.text
+      ..address = _addressController.text
+      ..province = _selectedProvince ?? machine!.province
+      ..canton = _selectedCanton ?? machine!.canton
+      ..userId = selectedUser!.id;
+
+    try {
+      final response = await _machineService.update(machine!.toJson());
+
+      if (response) {
+        Mensajes.mostrarMensaje(
+          context,
+          "La máquina '${machine!.name}' fue actualizada exitosamente.",
+          TipoMensaje.success,
+        );
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('SpecificMachine', jsonEncode(machine));
+        Navigator.pushReplacementNamed(context, "/tanks");
+      }
+    } catch (e) {
+      Mensajes.mostrarMensaje(
+        context,
+        "Error al actualizar la máquina: $e",
+        TipoMensaje.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -258,6 +257,7 @@ Future<void> _updateMachine() async {
                   isExpanded: true,
                   decoration: _inputDecoration("Provincia", ""),
                   value: _selectedProvince,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   items: provincesCities.keys.map((province) {
                     return DropdownMenuItem(
                       value: province,
@@ -265,16 +265,16 @@ Future<void> _updateMachine() async {
                     );
                   }).toList(),
                   onChanged: (value) {
-  setState(() {
-    _selectedProvince = value;
-    // Resetear cantón al cambiar de provincia
-    if (_selectedProvince != machine!.province) {
-      _selectedCanton = null;
-    } else {
-      _selectedCanton = machine!.canton;
-    }
-  });
-},
+                    setState(() {
+                      _selectedProvince = value;
+                      // Resetear cantón al cambiar de provincia
+                      if (_selectedProvince != machine!.province) {
+                        _selectedCanton = null;
+                      } else {
+                        _selectedCanton = machine!.canton;
+                      }
+                    });
+                  },
 
                   hint: Text('Seleccione una provincia'),
                   validator: (value) => value == null || value.isEmpty
@@ -287,6 +287,7 @@ Future<void> _updateMachine() async {
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   decoration: _inputDecoration("Cantón", ""),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   value: _selectedCanton,
                   items: _selectedProvince == null
                       ? []

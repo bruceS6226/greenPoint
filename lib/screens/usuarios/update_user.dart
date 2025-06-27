@@ -1,16 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/services/user_service.dart';
 import 'package:green_aplication/widgets/mensajes.dart';
 import 'package:green_aplication/widgets/mini_encabezado.dart';
-class PersonaLegal extends StatefulWidget {
-  const PersonaLegal({super.key});
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ActualizarUsuario extends StatefulWidget {
+  const ActualizarUsuario({super.key});
 
   @override
-  State<PersonaLegal> createState() => _PersonaLegalState();
+  State<ActualizarUsuario> createState() => _ActualizarUsuarioState();
 }
 
-class _PersonaLegalState extends State<PersonaLegal> {
+class _ActualizarUsuarioState extends State<ActualizarUsuario> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _identificationController;
@@ -20,6 +24,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
   String? _selectedRole;
   final UserService _userService = UserService();
   bool _isLoading = false;
+  User? selectedUser;
 
   @override
   void initState() {
@@ -29,6 +34,31 @@ class _PersonaLegalState extends State<PersonaLegal> {
     _emailController = TextEditingController();
     _addressController = TextEditingController();
     _phoneController = TextEditingController();
+    _loadInformation();
+  }
+
+  Future<void> _loadInformation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStringUser = prefs.getString('SpecificUser');
+
+    if (jsonStringUser != null) {
+      final jsonDataUser = jsonDecode(jsonStringUser);
+      setState(() {
+        selectedUser = User.fromJson(jsonDataUser);
+        _nameController.text = selectedUser!.name;
+        _identificationController.text = selectedUser!.identification;
+        _emailController.text = selectedUser!.email;
+        _addressController.text = selectedUser!.address;
+        _phoneController.text = selectedUser!.phone;
+        _selectedRole = selectedUser!.role;
+      });
+    } else {
+      Mensajes.mostrarMensaje(
+        context,
+        "No se encontró el usuario actual.",
+        TipoMensaje.error,
+      );
+    }
   }
 
   @override
@@ -69,43 +99,36 @@ class _PersonaLegalState extends State<PersonaLegal> {
     );
   }
 
-  Future<void> _registerUser() async {
+  Future<void> _updateUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
+      selectedUser!
+        ..email = _emailController.text
+        ..name = _nameController.text
+        ..identification = _identificationController.text
+        ..phone = _phoneController.text
+        ..address = _addressController.text
+        ..role = _selectedRole ?? 'USER';
 
       try {
-        final newUser = UserRequest(
-          id: 0,
-          email: _emailController.text,
-          name: _nameController.text,
-          password: '',
-          identification: _identificationController.text,
-          phone: _phoneController.text,
-          gender: '',
-          address: _addressController.text,
-          isNaturalPerson: false,
-          role: _selectedRole ?? 'USER',
-          isActive: true,
-        );
+        final response = await _userService.update(selectedUser!.toJson());
 
-        final response = await _userService.register(newUser.toJson());
-
-        if (response['id'] != null) {
+        if (response['data']['id'] != null) {
           Mensajes.mostrarMensaje(
             context,
-            'El  "${response['name']}" ha sido registrado correctamente.',
+            'El  "${response['data']['name']}" ha sido actualizado correctamente.',
             TipoMensaje.success,
           );
+          Navigator.pushReplacementNamed(context, "/createdUsers");
         } else {
           Mensajes.mostrarMensaje(
             context,
-            'Error desconocido al registrar el usuario.',
+            'Error desconocido al actualizar el usuario.',
             TipoMensaje.error,
           );
         }
-        // ✅ Diálogo con redirección
       } catch (e) {
         if (mounted) {
           Mensajes.mostrarMensaje(
@@ -126,7 +149,6 @@ class _PersonaLegalState extends State<PersonaLegal> {
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
       child: Container(
         margin: const EdgeInsets.only(left: 10, right: 10, top: 90, bottom: 8),
@@ -148,6 +170,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
                 textoBoton: "Regresar",
                 ruta: "/selectUserType",
               ),
+
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -156,17 +179,6 @@ class _PersonaLegalState extends State<PersonaLegal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Tipo Cliente
-                      TextFormField(
-                        initialValue: 'Persona Jurídica',
-                        decoration: _inputDecoration(
-                          "Tipo Cliente",
-                          "Ingrese su tipo de cliente",
-                        ),
-                        enabled: false,
-                      ),
-                      const SizedBox(height: 12),
-
                       // Rol
                       DropdownButtonFormField<String>(
                         value: _selectedRole,
@@ -190,7 +202,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
                             _selectedRole = value;
                           });
                         },
-                        hint: Text('Seleccione un rol'),
+                        //hint: Text('Seleccione un rol'),
                       ),
                       const SizedBox(height: 12),
 
@@ -198,13 +210,13 @@ class _PersonaLegalState extends State<PersonaLegal> {
                       TextFormField(
                         controller: _nameController,
                         decoration: _inputDecoration(
-                          "Nombre de la Persona Jurídica",
-                          "Ingrese su nombre",
+                          "Nombre Cliente",
+                          "Ingrese su nombre de cliente",
                         ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Nombre de la persona jurídica requerido';
+                            return 'Nombre del cliente requerido';
                           }
                           return null;
                         },
@@ -214,11 +226,14 @@ class _PersonaLegalState extends State<PersonaLegal> {
                       // Cédula / Pasaporte
                       TextFormField(
                         controller: _identificationController,
-                        decoration: _inputDecoration("RUC", "Ingrese su RUC"),
+                        decoration: _inputDecoration(
+                          "Cédula / Pasaporte",
+                          "Ingrese su cédula ó pasaporte",
+                        ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'RUC requerido';
+                            return 'Cédula ó pasaporte requerido';
                           }
                           return null;
                         },
@@ -284,11 +299,45 @@ class _PersonaLegalState extends State<PersonaLegal> {
                       ),
                       const SizedBox(height: 12),
 
+                      /* Género
+                      DropdownButtonFormField<String>(
+                        value: _selectedGender,
+                        decoration: _inputDecoration(
+                          "Género",
+                          "Seleccione su género",
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Género requerido';
+                          }
+                          return null;
+                        },
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Masculino',
+                            child: Text('Masculino'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Femenino',
+                            child: Text('Femenino'),
+                          ),
+                          DropdownMenuItem(value: 'Otro', child: Text('Otro')),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedGender = value;
+                          });
+                        },
+                        //hint: Text('Seleccione un género'),
+                      ),*/
+                      const SizedBox(height: 20),
+
                       // Botón registrar
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _registerUser,
+                          onPressed: _isLoading ? null : _updateUser,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _isLoading
                                 ? Colors.grey
@@ -310,7 +359,7 @@ class _PersonaLegalState extends State<PersonaLegal> {
                                   ),
                                 )
                               : const Text(
-                                  "Registrar Usuario",
+                                  "Actualizar Usuario",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,

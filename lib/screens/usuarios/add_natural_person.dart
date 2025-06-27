@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_aplication/models/user.dart';
 import 'package:green_aplication/services/user_service.dart';
+import 'package:green_aplication/widgets/mensajes.dart';
 import 'package:green_aplication/widgets/mini_encabezado.dart';
 
 class PersonaNatural extends StatefulWidget {
@@ -93,15 +94,28 @@ class _PersonaNaturalState extends State<PersonaNatural> {
 
         final response = await _userService.register(newUser.toJson());
 
+
         if (response['id'] != null) {
-          _showSuccessDialog(response['name']); // Pasamos el nombre al dialog
+          Mensajes.mostrarMensaje(
+            context,
+            'El  "${response['name']}" ha sido registrado correctamente.',
+            TipoMensaje.success,
+          );
         } else {
-          _showErrorDialog('Error desconocido al registrar el usuario.');
+          Mensajes.mostrarMensaje(
+            context,
+            'Error desconocido al registrar el usuario.',
+            TipoMensaje.error,
+          );
         }
         // ✅ Diálogo con redirección
       } catch (e) {
         if (mounted) {
-          _showErrorDialog('Error al registrar: $e');
+          Mensajes.mostrarMensaje(
+            context,
+            'Error al registrar: $e',
+            TipoMensaje.error,
+          );
         }
       } finally {
         if (mounted) {
@@ -111,44 +125,6 @@ class _PersonaNaturalState extends State<PersonaNatural> {
         }
       }
     }
-  }
-
-  void _showSuccessDialog(String name) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Registro exitoso'),
-        content: Text('El usuario "$name" ha sido registrado correctamente.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo
-              Navigator.pushReplacementNamed(
-                context,
-                '/createdUsers',
-              ); // Redirige
-            },
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Error en el registro'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
